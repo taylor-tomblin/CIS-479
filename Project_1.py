@@ -33,9 +33,9 @@ class PuzzleState:
 
 def is_goal_state(state):
   # Check if current state matches
-  goal_state = [(7, 8, 1),
-                (6, -, 2),
-                (5, 4, 3)]
+  goal_state = ((7, 8, 1),
+                (6, 0, 2),
+                (5, 4, 3))
   return state.board == goal_state
   
 def generate_next_states(current_state, wind_direction):
@@ -52,10 +52,10 @@ def solve_puzzle(initial_state, wind_direction):
     if is_goal_state(current_state):
       return current_state
       
-    if current_state not in visisted:
+    if current_state not in visited:
       visited.add(current_state)
       
-      for next_state in generate_next_states(current_state, windy_direction):
+      for next_state in generate_next_states(current_state, wind_direction):
         queue.append(next_state)
         
   return None
@@ -67,10 +67,10 @@ def reconstruct_path(state):
         state = state.parent
     return path[::-1]
   
-initial_state = [(1, 6, 2),
+initial_state = ((1, 6, 2),
                  (5, 7, 8),
-                 (-, 4, 3)]
+                 (0, 4, 3))
 
-def heuristic ():
+def heuristic(node, goal):
   # Determine the heuristic value
-  ...
+  
