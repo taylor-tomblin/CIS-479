@@ -71,6 +71,27 @@ initial_state = ((1, 6, 2),
                  (5, 7, 8),
                  (0, 4, 3))
 
-def heuristic(node, goal):
+def heuristic(board, goal):
   # Determine the heuristic value
+  size = len(board)
+  dist = 0
+  tiles_out_of_place = 0
+
+  # Find the position of the value in the goal board
+  goal_positions = {value: (i, j) for i, row in enumerate(goal) for j, value in enumerate(row)}
+
+  for i in range(size):
+    for j in range(size):
+      value = board[i][j]
+      if value != 0: # skipping the empty tile
+        goal_i, goal_j = goal_positions[value] # mapping the value found earlier to goal_i, goal_j
+
+        dx = abs(i - goal_i) # row difference
+        dy = abs(j - goal_j) # column difference
+
+        dist += dx * 2 + dy * (3 if (j > goal_j) else 1) # 3 if move right, 1 if move left
+
+        if (i, j) != (goal_i, goal_j):
+          tiles_out_of_place += 1
   
+  return dist + tiles_out_of_place
