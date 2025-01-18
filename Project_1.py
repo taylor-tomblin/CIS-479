@@ -7,6 +7,14 @@
 
 import heapq
 
+initial_state = ((1, 6, 2),
+                 (5, 7, 8),
+                 (0, 4, 3))
+                   
+goal_state = ((7, 8, 1),
+              (6, 0, 2),
+              (5, 4, 3))
+
 class Board:
   def __init__(self, board):
     # Initialize the board
@@ -36,11 +44,11 @@ class Board:
             return (i, j)
 
   def swap_positions(board, pos1, pos2):
-      # Swap two positions on the board
-      board = [list(row) for row in board]
-      board[pos1[0]][pos1[1]], board[pos2[0]][pos2[1]] = board[pos2[0]][pos2[1]], board[pos1[0]][pos1[1]]
+    # Swap two positions on the board
+    board = [list(row) for row in board]
+    board[pos1[0]][pos1[1]], board[pos2[0]][pos2[1]] = board[pos2[0]][pos2[1]], board[pos1[0]][pos1[1]]
 
-      return tuple(tuple(row) for row in board)
+    return tuple(tuple(row) for row in board)
 
 class PuzzleState:
   def __init__(self, state, parent=None, move=None):
@@ -75,7 +83,8 @@ def generate_next_states(current_state):
       new_blank_pos = (blank_pos[0] + directions[direction][0], blank_pos[1] + directions[direction][1])
         
       if 0 <= new_blank_pos[0] < len(current_state.board) and 0 <= new_blank_pos[1] < len(current_state.board[0]):
-        new_board = swap_positions(current_state.board, blank_pos, new_blank_pos)
+        new_board = Board()
+        new_board.swap_positions(current_state.board, blank_pos, new_blank_pos)
         next_states.append(PuzzleState(new_board, current_state))
     
     return next_states
@@ -144,13 +153,7 @@ def a_star_search(initial_state, goal_state):
 
 def main():
   # Read the initial and goal states from the file
-  initial_state = ((1, 6, 2),
-                   (5, 7, 8),
-                   (0, 4, 3))
-                   
-  goal_state = ((7, 8, 1),
-                (6, 0, 2),
-                (5, 4, 3))
+  
   
   # Solve the puzzle
   initial_state = PuzzleState(initial_state)
