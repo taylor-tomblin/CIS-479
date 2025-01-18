@@ -22,7 +22,7 @@ class Board:
     
   def __str__(self):
     # Return the string representation of the state
-    return '\n'.join([' '.join(map(str, row)) for row in self.board])
+    return str(self.state)
     
   def __repr__(self):
     # Return the string representation of the state
@@ -43,19 +43,79 @@ class Board:
     return tuple(tuple(row) for row in board)
 
 class PuzzleState:
-  def __init__(self, state, board, parent=None, move=None):
+  def __init__(self, state, parent=None, move=None):
     # Initialize the state
-    self.board = board
     self.state = state
     self.parent = parent
     self.move = move
-    self.g = 0  # Cost from start to current state
-    self.h = 0  # Heuristic cost from current state to goal state
-    self.f = 0  # Total cost of the state: f = g + h
+    self.g = 0
+    self.h = 0
+    self.f = 0
 
   def __lt__(self, other):
     # Compare the states
     return self.f < other.f
+
+def is_goal_state(state, goal_state):
+  # Check if current state matches
+  return state.board == goal_state
+  
+def generate_next_states(current_state):
+  # Generate possible next states
+    next_states = []
+    size = len(current_state.state)
+
+    blank_x, blank_y = next((i, j) for i, row in enumerate(current_state.state) for j, value in enumerate(row) if value == 0) # Find the index of blank tile
+    directions = {
+        'N': (-1, 0),
+        'S': (1, 0),
+        'E': (0, 1),
+        'W': (0, -1)
+        }
+    
+    for direction in directions:
+      new_blank_x, new_blank_y = blank_x + directions[direction][0], blank_y + directions[direction][1]
+        
+      if 0 <= new_blank_x < size and 0 <= new_blank_y < size:
+        new_board = [list(row) for row in current_state.state] # Converting tuple to list to swap tiles
+        new_board[blank_x][blank_y], new_board[new_blank_x][new_blank_y] = new_board[new_blank_x][new_blank_y], new_board[blank_x][blank_y] #Swap blank tile position 
+        next_states.append(PuzzleState(board = tuple(tuple(row for row in new_board))), current_state), move = (directions[direction][0], directions[direction][1])
+    
+    return next_states
+
+def reconstruct_path(state):
+    path = []
+
+    while state:
+      path.append(state.board)
+      state = state.parent
+
+    return path[::-1]
+
+def heuristic(board, goal):
+  # Determine the heuristic value
+  size = len(board)
+  dist = 0
+  tiles_out_of_place = 0
+
+  # Find the position of the value in the goal board
+  goal_positions = {value: (i, j) for i, row in enumerate(goal) for j, value in enumerate(row)}
+
+  for i in range(size):
+    for j in range(size):
+      value = board[i][j]
+      if value != 0: # skipping the empty tile
+        goal_i, goal_j = goal_positions[value] # mapping the value found earlier to goal_i, goal_j
+
+        dx = abs(i - goal_i) # row difference
+        dy = abs(j - goal_j) # column difference
+
+        dist += dx * 2 + dy * (3 if (j > goal_j) else 1) # 3 if move right, 1 if move left
+
+        if (i, j) != (goal_i, goal_j):
+          tiles_out_of_place += 1
+  
+  return dist + tiles_out_of_place
 
 def a_star_search(initial_state, goal_state):
   # Perform the A* search
@@ -84,80 +144,21 @@ def a_star_search(initial_state, goal_state):
         heapq.heappush(open_list, next_state)
         
   return None
-  
-def generate_next_states(current_state):
-  # Generate possible next states
-    next_states = []
-    blank_pos = current_state.board.get_blank_position(current_state.board)
-    directions = {
-        'N': (-1, 0),
-        'S': (1, 0),
-        'E': (0, 1),
-        'W': (0, -1)
-        }
-    
-    for direction in directions:
-      new_blank_pos = (blank_pos[0] + directions[direction][0], blank_pos[1] + directions[direction][1])
-        
-      if 0 <= new_blank_pos[0] < len(current_state.board) and 0 <= new_blank_pos[1] < len(current_state.board[0]):
-        new_board = Board()
-        new_board.swap_positions(current_state.board, blank_pos, new_blank_pos)
-        next_states.append(PuzzleState(new_board, current_state))
-    
-    return next_states
-
-def heuristic(board, goal):
-  # Determine the heuristic value
-  size = len(board)
-  dist = 0
-  tiles_out_of_place = 0
-
-  # Find the position of the value in the goal board
-  goal_positions = {value: (i, j) for i, row in enumerate(goal) for j, value in enumerate(row)}
-
-  for i in range(size):
-    for j in range(size):
-      value = board[i][j]
-      if value != 0: # skipping the empty tile
-        goal_i, goal_j = goal_positions[value] # mapping the value found earlier to goal_i, goal_j
-
-        dx = abs(i - goal_i) # row difference
-        dy = abs(j - goal_j) # column difference
-
-        dist += dx * 2 + dy * (3 if (j > goal_j) else 1) # 3 if move right, 1 if move left
-
-        if (i, j) != (goal_i, goal_j):
-          tiles_out_of_place += 1
-  
-  return dist + tiles_out_of_place
-
-def is_goal_state(state):
-  # Check if current state matches
-  return state.board == goal_state
-
-def reconstruct_path(state):
-    path = []
-
-    while state:
-      path.append(state.board)
-      state = state.parent
-
-    return path[::-1]
 
 def main():
   # Read the initial and goal states from the file
-  initial_state = Board(((1, 6, 2),
-                         (5, 7, 8),
-                         (0, 4, 3)))
+  initial_state = ((1, 6, 2),
+                   (5, 7, 8),
+                   (0, 4, 3))
                    
   goal_state = ((7, 8, 1),
                 (6, 0, 2),
                 (5, 4, 3))
   
   # Solve the puzzle
-  initial_state = PuzzleState(initial_state)
-  goal_state = PuzzleState(goal_state)
-  solution = a_star_search(initial_state, goal_state)
+  initial = PuzzleState(initial_state)
+  goal = PuzzleState(goal_state)
+  solution = a_star_search(initial, goal)
   
   # Output the solution
   if solution:
