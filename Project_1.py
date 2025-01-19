@@ -7,7 +7,7 @@
 
 import heapq
 
-class Board:
+""" class Board:
   def __init__(self, board):
     # Initialize the board
     self.board = board
@@ -40,7 +40,7 @@ class Board:
     board = [list(row) for row in board]
     board[pos1[0]][pos1[1]], board[pos2[0]][pos2[1]] = board[pos2[0]][pos2[1]], board[pos1[0]][pos1[1]]
 
-    return tuple(tuple(row) for row in board)
+    return tuple(tuple(row) for row in board) """
 
 class PuzzleState:
   def __init__(self, state, parent=None, move=None):
@@ -56,9 +56,12 @@ class PuzzleState:
     # Compare the states
     return self.f < other.f
 
-def is_goal_state(state, goal_state):
-  # Check if current state matches
-  return state.board == goal_state
+  def __eq__(self, other):
+    return self.state == other.state
+
+  def __hash__(self):
+    return hash(tuple(tuple(row) for row in self.state))  # Hashable for sets/dicts
+
   
 def generate_next_states(current_state):
   # Generate possible next states
@@ -78,8 +81,9 @@ def generate_next_states(current_state):
         
       if 0 <= new_blank_x < size and 0 <= new_blank_y < size:
         new_board = [list(row) for row in current_state.state] # Converting tuple to list to swap tiles
-        new_board[blank_x][blank_y], new_board[new_blank_x][new_blank_y] = new_board[new_blank_x][new_blank_y], new_board[blank_x][blank_y] #Swap blank tile position 
-        next_states.append(PuzzleState(board = tuple(tuple(row for row in new_board))), current_state), move = (directions[direction][0], directions[direction][1])
+        new_board[blank_x][blank_y], new_board[new_blank_x][new_blank_y] = new_board[new_blank_x][new_blank_y], new_board[blank_x][blank_y] #Swap blank tile position
+        new_state = PuzzleState(tuple(tuple(row) for row in new_board), parent = current_state, move = direction) 
+        next_states.append(new_state)
     
     return next_states
 
@@ -87,7 +91,7 @@ def reconstruct_path(state):
     path = []
 
     while state:
-      path.append(state.board)
+      path.append(state.state)
       state = state.parent
 
     return path[::-1]
@@ -136,7 +140,7 @@ def a_star_search(initial_state, goal_state):
         continue
       
       next_state.g = current_state.g + 1
-      next_state.h = heuristic(next_state.board, goal_state.board)
+      next_state.h = heuristic(next_state.state, goal_state.state)
       next_state.f = next_state.g + next_state.h
       next_state.parent = current_state
       
