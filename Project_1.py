@@ -75,13 +75,20 @@ def heuristic(board, goal):
   
   return dist, tiles_out_of_place
 
+def find_zero_position(board):
+    #Helper function to locate the position of 0 in a 2D tuple.
+    for row_idx, row in enumerate(board.board):
+        if 0 in row:
+            return row_idx, row.index(0)
+
 def a_star_search(initial_state, goal_state):
   # Perform the A* search
   open_set = []
   heapq.heappush(open_set, (0, initial_state))
   came_from = {}
+  initial_state.h = heuristic(initial_state.board, goal_state)[0] + heuristic(initial_state.board, goal_state)[1]
   g_score = {initial_state: 0}
-  f_score = {initial_state: heuristic(initial_state.board, goal_state)[0]}
+  f_score = {initial_state: g_score[initial_state] + initial_state.h}
 
   while open_set:
     _, current = heapq.heappop(open_set)
@@ -90,7 +97,18 @@ def a_star_search(initial_state, goal_state):
       return reconstruct_path(current)
 
     for neighbor in generate_next_states(current):
-      tentative_g_score = g_score[current] + 1
+      zero_position_current = find_zero_position(current)
+      zero_position_neighbor = find_zero_position(neighbor)
+
+      # Calculate movement direction
+      if zero_position_neighbor[1] == zero_position_current[1] - 1:  # Left
+        move_cost = 3
+      elif zero_position_neighbor[1] == zero_position_current[1] + 1:  # Right
+        move_cost = 1
+      else:  # Vertical (up or down)
+        move_cost = 2
+
+      tentative_g_score = g_score[current] + move_cost
 
       if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
         came_from[neighbor] = current
