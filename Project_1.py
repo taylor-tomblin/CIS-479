@@ -11,6 +11,9 @@ class PuzzleState:
   def __init__(self, board, parent=None):
     self.board = board
     self.parent = parent
+    self.f = 0
+    self.g = 0
+    self.h = 0
 
   def __lt__(self, other):
     return False
@@ -42,7 +45,7 @@ def reconstruct_path(state):
   path = []
 
   while state:
-    path.append(state.board)
+    path.append(state)
     state = state.parent
 
   return path[::-1]
@@ -92,7 +95,11 @@ def a_star_search(initial_state, goal_state):
       if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
         came_from[neighbor] = current
         g_score[neighbor] = tentative_g_score
-        f_score[neighbor] = tentative_g_score + heuristic(neighbor.board, goal_state)[0]
+        neighbor.g = g_score[neighbor]
+        dist, tile_oop = heuristic(neighbor.board, goal_state)
+        neighbor.h = dist + tile_oop
+        neighbor.f = neighbor.g + neighbor.h
+        f_score[neighbor] = neighbor.f
         print(f"Processing state with heuristic {f_score[neighbor]}: {neighbor.board}")
         heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
@@ -102,10 +109,10 @@ def main():
   # Read the initial and goal states
   initial_state = PuzzleState(((1, 6, 2),
                                (5, 7, 8),
-                               (0, 3, 4)))
-  goal_state = ((1, 2, 3),
-                (4, 5, 6),
-                (7, 8, 0))
+                               (0, 4, 3)))
+  goal_state = ((7, 8, 1),
+                (6, 0, 2),
+                (5, 4, 3))
 
   path = a_star_search(initial_state, goal_state)
 
@@ -113,8 +120,10 @@ def main():
   if path:
     print("\nPath found:")
     for state in path:
-      for row in state:
+      for row in state.board:
         print(row)
+      print(f'State G Score: {state.g}')
+      print(f"State H Score: {state.h}")
       print()
   else:
     print("No path found")
