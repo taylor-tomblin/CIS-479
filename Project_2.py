@@ -1,4 +1,4 @@
-# Author: Taylor Tomblin
+# Author: Taylor Tomblin, Michaela Luong
 # Login: ttomblin, michalu
 # Date: 
 # Description: This program implements a Robot Localization system using the Kalman Filter update step based algorithm.
