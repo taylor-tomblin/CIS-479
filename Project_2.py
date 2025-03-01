@@ -1,6 +1,6 @@
 # Author: Taylor Tomblin, Michaela Luong
 # Login: ttomblin, michalu
-# Date: 
+# Date: 2/28/2025
 # Description: This program implements a Robot Localization system using the Kalman Filter update step based algorithm.
 
 import numpy as np
@@ -13,26 +13,25 @@ To install numpy, run the following command:  pip3 install numpy
 # Define the maze layout
 # 0: open square, 1: obstacle
 maze = np.array([
-  [0, 0, 1, 1, 1, 1, 0],
-  [0, 0, 0, 1, 1, 1, 0],
-  [1, 0, 0, 0, 1, 1, 0],
-  [1, 1, 0, 0, 0, 1, 0],
-  [1, 1, 1, 0, 0, 0, 0],
-  [1, 1, 1, 1, 0, 0, 0]
+  [1, 1, 0, 0, 1, 1, 0, 0, 1],
+  [1, 1, 1, 0, 1, 1, 0, 1, 1],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 1, 0, 0, 1, 1, 0, 0, 1],
+  [1, 1, 1, 0, 1, 1, 0, 1, 1]
 ])
 
 # Define the possible movements and their probabilities
 movement_probs = {
-  'N': {'straight': 0.75, 'left': 0.15, 'right': 0.10},
-  'S': {'straight': 0.75, 'left': 0.15, 'right': 0.10},
-  'W': {'straight': 0.75, 'left': 0.15, 'right': 0.10},
-  'E': {'straight': 0.75, 'left': 0.15, 'right': 0.10}
+  'N': {'straight': 0.7, 'left': 0.1, 'right': 0.20},
+  'S': {'straight': 0.7, 'left': 0.1, 'right': 0.20},
+  'W': {'straight': 0.7, 'left': 0.1, 'right': 0.20},
+  'E': {'straight': 0.7, 'left': 0.1, 'right': 0.20}
 }
 
 # Define the sensing probabilities
 sensing_probs = {
-  'obstacle': {'detected': 0.90, 'not_detected': 0.05},
-  'open': {'detected': 0.05, 'not_detected': 0.90}
+  'obstacle': {'detected': 0.95, 'not_detected': 0.05},
+  'open': {'detected': 0.15, 'not_detected': 0.85}
 }
 
 # Initialize the probability distribution
@@ -140,13 +139,13 @@ def main():
 
   # Sequence of actions
   actions = [
-    ('sensing', [0, 0, 0, 0]),
+    ('sensing', [1, 0, 1, 1]),
     ('moving', 'N'),
-    ('sensing', [0, 0, 1, 0]),
+    ('sensing', [0, 0, 0, 1]),
     ('moving', 'N'),
-    ('sensing', [0, 1, 1, 0]),
-    ('moving', 'W'),
     ('sensing', [0, 1, 0, 0]),
+    ('moving', 'W'),
+    ('sensing', [0, 0, 0, 0]),
     ('moving', 'S'),
     ('sensing', [0, 0, 0, 0])
   ]
